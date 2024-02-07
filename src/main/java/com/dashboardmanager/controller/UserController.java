@@ -120,12 +120,13 @@ public class UserController {
         var coder = new BeanXMLByteCoder();
         List<User> newUsers;
         try {
-             newUsers = (List<User>) coder.decode(request.getInputStream());
+            newUsers = (List<User>) coder.decode(request.getInputStream());
         } catch (IOException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
         usersRepository.saveAll(newUsers);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
 
     @PostMapping("/user/migrate")
     public ResponseEntity<Resource> migrateUser(@RequestParam(value = "username") String username) {
