@@ -1,5 +1,6 @@
 package com.dashboardmanager.controller;
 
+import ca.odell.glazedlists.impl.io.BeanXMLByteCoder;
 import cn.hutool.cache.file.LRUFileCache;
 import com.dashboardmanager.model.Session;
 import com.dashboardmanager.model.User;
@@ -18,6 +19,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -27,6 +29,7 @@ import org.springframework.web.servlet.view.RedirectView;
 
 import java.io.*;
 import java.security.SecureRandom;
+import java.util.List;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Savepoint;
@@ -110,6 +113,19 @@ public class UserController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
+    }
+
+    @PostMapping("/user/import")
+    public ResponseEntity<Resource> importUsers(HttpServletRequest request) {
+        var coder = new BeanXMLByteCoder();
+        List<User> newUsers;
+        try {
+            newUsers = (List<User>) coder.decode(request.getInputStream());
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
+        usersRepository.saveAll(newUsers);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
     @PostMapping("/user/migrate")
